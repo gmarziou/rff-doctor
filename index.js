@@ -7,6 +7,7 @@ var which = require('which');
 var chalk = require('chalk');
 var figures = require('figures');
 var semver = require('semver');
+var shelljs = require('shelljs');
 
 module.exports = {
 
@@ -25,7 +26,10 @@ module.exports = {
     .then(this.checkGruntCli.bind(this))
     .then(this.checkBower.bind(this))
     .then(this.checkRuby.bind(this))
-    .then(this.checkSass.bind(this))
+    .then(this.checkCompass.bind(this))
+    .then(this.checkGulp.bind(this))
+    .then(this.checkJava.bind(this))
+    .then(this.checkMaven.bind(this))
     .then(function () {
       this.showResults();
       this.handleCallback(cb);
@@ -260,6 +264,29 @@ module.exports = {
     return d.promise;
   },
 
+  checkGulp: function () {
+    var d = Q.defer();
+    var name = 'gulp';
+    which('gulp', function (error, p) {
+      if (error) {
+        this.log(
+          name,
+          'ng',
+          'Gulp is not found on your computer.',
+          'Install gulp using npm command:\n' +
+          '  $ npm install -g gulp',
+          error
+        );
+        d.resolve();
+        return;
+      }
+      this.gulpInstalled = true;
+      this.log(name, 'ok', 'Gulp is installed.');
+      d.resolve();
+    }.bind(this));
+    return d.promise;
+  },
+
   checkBower: function () {
     var d = Q.defer();
     var name = 'bower';
@@ -306,31 +333,94 @@ module.exports = {
     return d.promise;
   },
 
-  checkSass: function () {
+  checkCompass: function () {
     var d = Q.defer();
-    var name = 'sass';
+    var name = 'compass';
     if (!this.rubyInstalled) {
-      this.log(name, 'skipped', 'Skip Sass installation test.');
+      this.log(name, 'skipped', 'Skip Compass installation test.');
       return;
     }
-    which('sass', function (error, p) {
+    which('compass', function (error, p) {
       if (error) {
         this.log(
           name,
           'ng',
-          'Sass is not found on your computer.',
-          '1. Install Sass using gem:\n' +
-          '     $ gem install sass\n' +
+          'Compass is not found on your computer.',
+          '1. Install Compass using gem:\n' +
+          '     $ gem install compass\n' +
           '2. Set the installation directory to PATH if you haven\'t.',
           error
         );
         d.resolve();
         return;
       }
-      this.log(name, 'ok', 'Sass is installed.');
+      this.log(name, 'ok', 'Compass is installed.');
       d.resolve();
     }.bind(this));
     return d.promise;
-  }
+  },
+
+  checkJava: function () {
+    var d = Q.defer();
+    var name = 'java';
+    which('javac', function (error, p) {
+      if (error) {
+        this.log(
+          name,
+          'ng',
+          'JDK is not found on your computer.',
+          '1. Install JDK.\n' +
+          '   http://www.oracle.com/technetwork/java/javase/downloads/index.html/\n' +
+          '2. Set the installation directory to PATH if you haven\'t.',
+          error
+        );
+        d.resolve();
+        return;
+      }
+      this.javaInstalled = true;
+      this.log(name, 'ok', 'JDK is installed.');
+      d.resolve();
+    }.bind(this));
+    return d.promise;
+  },
+
+  checkMaven: function () {
+    var d = Q.defer();
+    var name = 'maven';
+    if (!this.javaInstalled) {
+      this.log(name, 'skipped', 'Skip Maven installation test.');
+      return;
+    }
+    which('mvn', function (error, p) {
+      if (error) {
+        this.log(
+          name,
+          'ng',
+          'Maven is not found on your computer.',
+          '1. Install Maven.\n' +
+          '   http://maven.apache.org/\n' +
+          '2. Set the installation directory to PATH if you haven\'t.',
+          error
+        );
+        d.resolve();
+        return;
+      }
+      if (!shelljs.env.M2_HOME) {
+        this.log(
+          name,
+          'ng',
+          'M2_HOME environment variable is not defined on your computer.',
+          'Set M2_HOME to the installation directory where you have installed Maven.',
+          error
+        );
+        return;
+      }
+      this.mavenInstalled = true;
+      this.log(name, 'ok', 'Maven is installed.');
+      d.resolve();
+    }.bind(this));
+    return d.promise;
+  },
+
 
 };

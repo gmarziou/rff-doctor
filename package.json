@@ -49,6 +49,7 @@
     "lodash": "^2.4.1",
     "q": "^1.0.1",
     "semver": "^4.1.0",
+    "shelljs": "^0.3.0",
     "which": "^1.0.5"
   },
   "devDependencies": {
